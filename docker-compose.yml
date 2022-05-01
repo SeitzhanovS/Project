@@ -36,6 +36,20 @@ services:
     volumes:
       - ./data:/data
 
+  ingestion-py:
+    image: ingestion-py
+    build: images/ingestion-py
+    command: ["./ingestion.py"]
+    volumes:
+      - ./data:/data
+
+  output-py:
+    image: output-py
+    build: images/output-py
+    command: ["./output.py"]
+    volumes:
+      - ./data:/data
+
   example-r:
     image: example-r
     build: images/example-r
@@ -57,3 +71,4 @@ services:
     command: ["swift", "run"]
     volumes:
       - ./data:/data
+
