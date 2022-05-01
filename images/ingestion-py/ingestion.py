@@ -1,3 +1,5 @@
+#!/bin/bash
+
 import sqlalchemy
 import csv
 import json
