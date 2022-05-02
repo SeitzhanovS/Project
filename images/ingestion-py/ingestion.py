@@ -20,7 +20,7 @@ def Places_Ingestion():
 
   print('Starting ingestion to Places table')
   Places = sqlalchemy.schema.Table('Places', metadata, autoload=True, autoload_with=engine)
-  connection.execute(Places.delete())
+  connection.execute("""TRUNCATE TABLE Places""")
   with open('data/places.csv', encoding='utf-8') as csv_file:
     reader = csv.reader(csv_file)
     next(reader)
@@ -33,7 +33,7 @@ def People_Ingestion():
 
   print('Starting ingestion to People table')
   People = sqlalchemy.schema.Table('People', metadata, autoload=True, autoload_with=engine)
-  connection.execute(People.delete())
+  connection.execute("""TRUNCATE TABLE People""")
   with open('data/people.csv', encoding='utf-8') as csv_file:
     reader = csv.reader(csv_file)
     lst = list()

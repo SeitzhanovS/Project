@@ -22,6 +22,7 @@ try:
     rows = connection.execute(query)
     rows = [{'country': row[0], 'count': row[1]} for row in rows]
     json.dump(rows, json_file, separators=(',', ':'))
+    print("Successfully loaded")
 
 except sqlalchemy.exc.OperationalError as e:
   print('Database connection error')
