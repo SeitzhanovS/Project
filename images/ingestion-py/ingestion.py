@@ -16,11 +16,13 @@ def smoketest():
   Pec = connection.execute("""SELECT COUNT(*) FROM People""")
   print('People count',[row[0] for row in Pec])
 
-def Places_Ingestion():
+def places_ingestion():
 
   print('Starting ingestion to Places table')
   Places = sqlalchemy.schema.Table('Places', metadata, autoload=True, autoload_with=engine)
+  connection.execute("""SET FOREIGN_KEY_CHECKS = 0""")
   connection.execute("""TRUNCATE TABLE Places""")
+  connection.execute("""SET FOREIGN_KEY_CHECKS = 1""")
   with open('data/places.csv', encoding='utf-8') as csv_file:
     reader = csv.reader(csv_file)
     next(reader)
@@ -29,11 +31,14 @@ def Places_Ingestion():
 
   print('Finished ingestion to Places table')
 
-def People_Ingestion():
+def people_ingestion():
 
   print('Starting ingestion to People table')
   People = sqlalchemy.schema.Table('People', metadata, autoload=True, autoload_with=engine)
+
+  connection.execute("""SET FOREIGN_KEY_CHECKS = 0""")
   connection.execute("""TRUNCATE TABLE People""")
+  connection.execute("""SET FOREIGN_KEY_CHECKS = 1""")
   with open('data/people.csv', encoding='utf-8') as csv_file:
     reader = csv.reader(csv_file)
     lst = list()
@@ -49,28 +54,34 @@ def People_Ingestion():
         lst.clear()
   print('Finished ingestion to People table')
 
-try:
-  Places_Ingestion()
-except sqlalchemy.exc.OperationalError as e:
-  print('Database connection error')
-  print('Error text : ', str(e))
-except sqlalchemy.exc.NoSuchTableError as e:
-  print('Places Table does not exist...Creating new table')
-  connection.execute("""CREATE TABLE Places(
-        city varchar(255),
-        county varchar(255),
-        country varchar(255),
-        PRIMARY KEY (city)
-  )""")
-  Places_Ingestion()
 
-try:
-  People_Ingestion()
-except sqlalchemy.exc.OperationalError as e:
-  print('Database connection error')
-  print('Error text : ', str(e))
-except sqlalchemy.exc.NoSuchTableError as e:
-  print('People Table does not exist...Creating new table')
+if sqlalchemy.inspect(engine).has_table("Places"):
+
+  try:
+    places_ingestion()
+  except sqlalchemy.exc.OperationalError as e:
+    print('Database connection error')
+    print('Error text : ', str(e))
+
+else:
+  connection.execute("""CREATE TABLE Places(
+          city varchar(255),
+          county varchar(255),
+          country varchar(255),
+          PRIMARY KEY (city)
+    )""")
+  places_ingestion()
+
+
+if sqlalchemy.inspect(engine).has_table("People"):
+
+  try:
+    people_ingestion()
+  except sqlalchemy.exc.OperationalError as e:
+    print('Database connection error')
+    print('Error text : ', str(e))
+
+else:
   connection.execute("""CREATE TABLE People(
     given_name varchar(255),
     family_name varchar(255),
@@ -79,7 +90,7 @@ except sqlalchemy.exc.NoSuchTableError as e:
     FOREIGN KEY (place_of_birth)
     REFERENCES Places (city)
   )""")
-  People_Ingestion()
+  people_ingestion()
 
 smoketest()
 print('Ingestion complete')
